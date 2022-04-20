@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file://./db/data.db"
+  url      = "file:../db/data.db"
 }
 
 model Station {
@@ -22,12 +22,13 @@ model Train {
 }
 
 model TrainTimetable {
-  train     Train  @relation(fields: [trainName], references: [name])
-  trainName String
-  station   Station @relation(fields: [stationId], references: [id])
-  stationId String
-  arrival   DateTime?
-  departure DateTime?
+  train          Train  @relation(fields: [trainName], references: [name])
+  trainName      String
+  station        Station @relation(fields: [stationId], references: [id])
+  stationId      String
+  arrival        DateTime?
+  departure      DateTime?
+  displayOnBoard Boolean @default(true)
 
   @@id([trainName, stationId])
 }
