@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file://./db/data.db"
+}
+
+model Station {
+  id         String @id @unique
+  name       String 
+  timetables TrainTimetable[]
+}
+
+model Train {
+  name       String           @id @unique
+  departures TrainTimetable[]
+}
+
+model TrainTimetable {
+  train     Train  @relation(fields: [trainName], references: [name])
+  trainName String
+  station   Station @relation(fields: [stationId], references: [id])
+  stationId String
+  arrival   DateTime?
+  departure DateTime?
+
+  @@id([trainName, stationId])
+}
