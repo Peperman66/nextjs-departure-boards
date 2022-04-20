@@ -1,23 +1,27 @@
-import type { NextPage } from 'next'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import StationComponent from '../components/station'
 import styles from '../styles/Home.module.css'
-import Station from '../types/station'
+import { Station } from '../types/station'
 import io, { Socket } from 'socket.io-client'
+import { WebsocketEvents } from '../types/websocket'
+import { getStations } from '../handlers/dbHandler'
 
-const originStations: Station[] = [
-  {
-    id: '1',
-    name: 'A',
-    occupied: false
+export const getServerSideProps: GetServerSideProps = async function() {
+  let result = JSON.stringify(getStations());
+  if (result == '{}') result = '[]'
+  return {
+    props: {
+      stations: result
+    }
   }
-]
+}
 
-const Home: NextPage = () => {
-  const [stations, setStations] = useState<Station[]>(originStations)
+const Home: NextPage<{stations: string}> = (props) => {
+  const [stations, setStations] = useState<Station[]>(JSON.parse(props.stations))
 
   let socket: Socket
 
@@ -27,8 +31,8 @@ const Home: NextPage = () => {
     await fetch('/api/socket')
     socket = io()
 
-    socket.on('connect', () => {
-
+    socket.on(WebsocketEvents.StationsUpdate, (data) => {
+      setStations(data)
     })
   }
 
