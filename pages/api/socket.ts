@@ -3,6 +3,8 @@ import { NextApiRequest } from 'next'
 import {Server} from 'socket.io'
 import {v4} from 'uuid'
 import { WebsocketEvents } from '../../types/websocket'
+import { createStation, getStations } from '../../handlers/dbHandler'
+import { Station } from '../../types/station'
 
 const connections = []
 
@@ -14,8 +16,13 @@ const SocketHandler = (req: NextApiRequest, res: any) => {
 		io.engine.generateId = (req: IncomingMessage) => {
 			return v4()
 		}
-		io.on('connection', socket => {
-			socket.emit(WebsocketEvents.StationsUpdate, )
+		io.on('connection', async socket => {
+			const stations = await getStations();
+			socket.emit(WebsocketEvents.StationsUpdate, stations);
+		});
+
+		io.on(WebsocketEvents.StationCreate, async (data: Station) => {
+			createStation(data)
 		})
 	}
 	res.end()
