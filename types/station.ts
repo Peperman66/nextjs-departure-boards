@@ -1,5 +1,4 @@
-export default interface Station {
+export type Station = {
 	name: string;
 	id: string;
-	occupied: boolean;
 }
