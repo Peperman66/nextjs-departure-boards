@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import StationComponent from '../components/station'
 import styles from '../styles/Home.module.css'
 import Station from '../types/station'
+import io, { Socket } from 'socket.io-client'
 
 const originStations: Station[] = [
   {
@@ -18,19 +19,30 @@ const originStations: Station[] = [
 const Home: NextPage = () => {
   const [stations, setStations] = useState<Station[]>(originStations)
 
-  const stationElements = stations.map(station => <StationComponent {...station} />)
+  let socket: Socket
+
+  useEffect(() => {socketInitializer()}, [])
+
+  const socketInitializer = async () => {
+    await fetch('/api/socket')
+    socket = io()
+
+    socket.on('connect', () => {
+
+    })
+  }
+
+  const stationElements = stations.map(station => <StationComponent key={station.id} {...station} />)
   return (
     <>
       <Head>
         <title>Odjezdové tabule</title>
       </Head>
-      <body>
-        <div className={styles.main}>
-          <h1>Seznam stanic</h1>
-          <hr/>
-          {stationElements}
-        </div>
-      </body>
+      <main className={styles.main}>
+        <h1>Seznam stanic</h1>
+        <hr/>
+        {stationElements}
+      </main>
     </>
   )
 }
