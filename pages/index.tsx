@@ -4,11 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import StationComponent from '../components/station'
-import styles from '../styles/Home.module.css'
 import { Station } from '../types/station'
 import io, { Socket } from 'socket.io-client'
 import { WebsocketEvents } from '../types/websocket'
 import { getStations } from '../handlers/dbHandler'
+import Header from '../components/header'
 
 export const getServerSideProps: GetServerSideProps = async function() {
   let result = JSON.stringify(getStations());
@@ -25,7 +25,11 @@ const Home: NextPage<{stations: string}> = (props) => {
 
   let socket: Socket
 
-  useEffect(() => {socketInitializer()}, [])
+  useEffect(() => {
+    socketInitializer()
+
+    return () => {socketDestroyer()}
+  }, [])
 
   const socketInitializer = async () => {
     await fetch('/api/socket')
@@ -36,15 +40,18 @@ const Home: NextPage<{stations: string}> = (props) => {
     })
   }
 
+  const socketDestroyer = () => {
+    socket.close()
+  }
+
   const stationElements = stations.map(station => <StationComponent key={station.id} {...station} />)
   return (
     <>
       <Head>
         <title>Odjezdové tabule</title>
       </Head>
-      <main className={styles.main}>
-        <h1>Seznam stanic</h1>
-        <hr/>
+      <Header header='Seznam stanic' />
+      <main className="text-center">
         {stationElements}
       </main>
     </>
