@@ -10,13 +10,24 @@ export const getStations = async () => {
 	return stations
 }
 
-export const getStationName = async (id: string) => {
+export const getStationWithAllTimetables = async (id: string) => {
 	const station = await prisma.station.findFirst({
 		where: {
 			id: id
+		},
+		include: {
+			timetables: {
+				include: {
+					train: {
+						include: {
+							departures: true
+						}
+					}
+				}
+			}
 		}
 	});
-	return station?.name;
+	return station as Station;
 }
 
 export const createStation = async (station: Station) => {
