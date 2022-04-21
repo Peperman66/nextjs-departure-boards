@@ -19,11 +19,19 @@ export const getStationName = async (id: string) => {
 	return station?.name;
 }
 
-export const createStation = (station: Station) => {
-	return prisma.station.create({
+export const createStation = async (station: Station) => {
+	await prisma.station.create({
 		data: {
 			id: station.id,
 			name: station.name
+		}
+	})
+}
+
+export const deleteStation = async (id: string) => {
+	await prisma.station.delete({
+		where: {
+			id: id
 		}
 	})
 }
