@@ -8,4 +8,6 @@ export type Timetable = {
 	stationId : string
 	arrival ?: Date
 	departure ?: Date
+	realDeparture ?: Date
+	displayOnBoard: boolean
 }

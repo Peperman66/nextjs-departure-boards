@@ -28,6 +28,7 @@ model TrainTimetable {
   stationId      String
   arrival        DateTime?
   departure      DateTime?
+  realDeparture  DateTime?
   displayOnBoard Boolean @default(true)
 
   @@id([trainName, stationId])
