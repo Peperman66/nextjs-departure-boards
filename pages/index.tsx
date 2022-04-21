@@ -10,7 +10,7 @@ import Header from '../components/header'
 import CreateStation from '../components/createStation'
 
 export const getServerSideProps: GetServerSideProps = async function() {
-  let result = JSON.stringify(getStations());
+  let result = JSON.stringify(await getStations());
   if (result == '{}') result = '[]'
   return {
     props: {
