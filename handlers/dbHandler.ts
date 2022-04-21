@@ -10,6 +10,15 @@ export const getStations = async () => {
 	return stations
 }
 
+export const getStationName = async (id: string) => {
+	const station = await prisma.station.findFirst({
+		where: {
+			id: id
+		}
+	});
+	return station?.name;
+}
+
 export const createStation = (station: Station) => {
 	return prisma.station.create({
 		data: {
@@ -23,12 +32,16 @@ export const getTrains = async () => {
 	const trains = await prisma.train.findMany({
 		include: {
 			departures: {
-				orderBy: {
-					departure: 'asc',
-					arrival: 'asc'
-				}
+				orderBy: [
+					{
+						departure: 'asc'
+					},
+					{
+						arrival: 'asc'
+					}
+				]
 			}
 		}
-	}) as (Train & {departures: Timetable[]})[];
+	}) as Train[];
 	return trains;
 }
