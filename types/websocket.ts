@@ -3,5 +3,7 @@ export enum WebsocketEvents {
 	StationCreate = 'station-create',
 	StationDelete = 'station-delete',
 	TrainCreate = 'train-create',
-	TrainTimeUpdate = 'train-time-update'
+	TrainTimetableUpdate = 'train-timetable-update',
+	StationTrainsUpdate = 'station-trains-update',
+	TrainDelete = 'train-delete'
 }
