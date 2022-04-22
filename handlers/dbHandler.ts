@@ -10,11 +10,8 @@ export const getStations = async () => {
 	return stations
 }
 
-export const getStationWithAllTimetables = async (id: string) => {
-	const station = await prisma.station.findFirst({
-		where: {
-			id: id
-		},
+export const getStationsWithAllTimetables = async () => {
+	const station = await prisma.station.findMany({
 		include: {
 			timetables: {
 				include: {
@@ -27,7 +24,7 @@ export const getStationWithAllTimetables = async (id: string) => {
 			}
 		}
 	});
-	return station as Station;
+	return station as Station[];
 }
 
 export const createStation = async (station: Station) => {
@@ -43,6 +40,56 @@ export const deleteStation = async (id: string) => {
 	await prisma.station.delete({
 		where: {
 			id: id
+		}
+	})
+}
+
+export const createTrain = async (train: Train) => {
+	await prisma.train.create({
+		data: {
+			name: train.name,
+			departures: {
+				create: train.departures?.map((departure) => {
+					return {
+						stationId: departure.stationId,
+						arrival: departure.arrival,
+						departure: departure.departure,
+						realDeparture: departure.realDeparture,
+						displayOnBoard: departure.displayOnBoard
+					}
+				})
+			}
+		}
+	})
+}
+
+export const deleteTrain = async (train: Train) => {
+	const deleteTimetables = prisma.trainTimetable.deleteMany({
+		where: {
+			trainName: train.name
+		}
+	})
+
+	const deleteTrain = prisma.train.delete({
+		where: {
+			name: train.name
+		}
+	})
+
+	return prisma.$transaction([deleteTimetables, deleteTrain])
+}
+
+export const updateTimetable = async (timetable: Timetable) => {
+	await prisma.trainTimetable.update({
+		where: {
+			trainName_stationId: {
+				trainName: timetable.trainName,
+				stationId: timetable.stationId
+			}
+		},
+		data: {
+			realDeparture: timetable.realDeparture,
+			displayOnBoard: timetable.displayOnBoard
 		}
 	})
 }
