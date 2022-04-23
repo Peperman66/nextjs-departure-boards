@@ -1,3 +1,4 @@
+import { time } from "console"
 import { GetServerSideProps } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
@@ -10,30 +11,42 @@ import { Station } from "../../../types/station"
 import { Timetable } from "../../../types/timetable"
 import { Train } from "../../../types/train"
 import { WebsocketEvents } from "../../../types/websocket"
-/*
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
-	const {id} = context.query;
-	let station: Station;
-	if (typeof id === "string") {
-		station = await getStationsWithAllTimetables(id)
-	}
-	const stations = await getStations()
-	let trains = JSON.stringify(await getTrains())
-	if (trains == '{}') trains = '[]'
+	const stations = await getStationsWithAllTimetables()
 	return {
 		props: {
-			trains: trains,
-			//@ts-ignore
-			station: JSON.stringify(station),
-			allStations: JSON.stringify(stations)
+			stations: JSON.stringify(stations)
 		}
 	}
 }
-*/
-const ManageStation: FC/*<{trains: string, station: string, allStations: string}>*/ = (props) => {
-	const [trains, setTrains] = useState<Train[]>([]/*JSON.parse(props.trains)*/);
+
+const getTimetableWithDatesConverted = (timetable: Timetable) => {
+	timetable.arrival = timetable.arrival ? new Date(timetable.arrival) : undefined
+	timetable.departure = timetable.departure ? new Date(timetable.departure) : undefined
+	timetable.realDeparture = timetable.realDeparture ? new Date(timetable.realDeparture) : undefined
+	return timetable
+}
+
+const getStationsWithDatesConverted = (stations: Station[]): Station[] => {
+	return (stations.map(station => {
+		station.timetables = station.timetables?.map(timetable => {
+			timetable = getTimetableWithDatesConverted(timetable)
+			if (timetable.train?.departures) {
+				timetable.train.departures = timetable.train?.departures?.map(timetable => {
+					return getTimetableWithDatesConverted(timetable)
+				})
+			}
+			return timetable
+		})
+		return station
+	}))
+}
+
+const ManageStation: FC<{stations: string}> = (props) => {
+	const parsedStations: Station[] = JSON.parse(props.stations) 
 	const [socket, setSocket] = useState<Socket>()
-	const [stations, setStations] = useState<Station[]>([]/*JSON.parse(props.allStations)*/)
+	const [stations, setStations] = useState<Station[]>(getStationsWithDatesConverted(parsedStations))
 	const router = useRouter()
 	const {id} = router.query
 	const station = stations.find(x => x.id == id)
@@ -51,12 +64,8 @@ const ManageStation: FC/*<{trains: string, station: string, allStations: string}
 		await fetch('/api/socket')
 		let thisSocket = io()
 
-		thisSocket.on(WebsocketEvents.StationTrainsUpdate, (trains: Train[]) => {
-			setTrains(trains)
-		});
-		
 		thisSocket.on(WebsocketEvents.StationsUpdate, (stations: Station[]) => {
-			setStations(stations)
+			setStations(getStationsWithDatesConverted(stations))
 		})
 		
 		setSocket(thisSocket)
