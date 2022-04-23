@@ -1,22 +1,22 @@
 import { GetServerSideProps } from "next";
 import { FC, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { getStationName, getTrains } from "../../../handlers/dbHandler";
+import { getStationsWithAllTimetables, getTrains } from "../../../handlers/dbHandler";
+import { Station } from "../../../types/station";
 import { Train } from "../../../types/train";
 import { WebsocketEvents } from "../../../types/websocket";
 
 const getServerSideProps: GetServerSideProps = async (context) => {
 	const {id} = context.query;
-	let station = "";
+	let stations: Station[] = [];
 	if (typeof id === "string") {
-		station = await getStationName(id) || ""
+		stations = await getStationsWithAllTimetables() || []
 	}
 	let trains = JSON.stringify(await getTrains())
 	if (trains == '{}') trains = '[]'
 	return {
 		props: {
-			trains: trains,
-			station: station 
+			stations: stations 
 		}
 	}
 }
