@@ -107,7 +107,7 @@ const TrainManageTableRow: FC<{timetable: Timetable, allTimetables: Timetable[],
 		console.log(bestTimetable.realDeparture)
 		diff /= 1000 * 60
 		diff = Math.floor(diff)
-		return `${Math.sign(diff) == -1 ? "-" : Math.sign(diff) == 0 ? "" : "+"}${diff.toString()}`
+		return `${Math.sign(diff) == 0 ? "+" : ""}${diff.toString()}`
 	}
 
 	const validateInput = () => {
